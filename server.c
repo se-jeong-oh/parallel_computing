@@ -130,12 +130,12 @@ void send_msg(char * msg, int len, void * arg)   // send to all
    //fprintf(stderr, file_name);
    pthread_mutex_lock(&mutx);
    while(fgets(file_cont, 100, fp)) {
-      printf("1st : %s", file_cont);
+      //printf("1st : %s", file_cont);
       if(strcmp(file_cont, "<body>\n") == 0)
          break;
    }
    while(fgets(file_cont, 100, fp)) {
-      printf("2nd : %s", file_cont);
+      //printf("2nd : %s", file_cont);
       if(strcmp(file_cont, "</body>\n") == 0) {
          write(clnt_sock, file_cont, BUF_SIZE);
          break;
