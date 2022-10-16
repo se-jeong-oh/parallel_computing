@@ -17,7 +17,7 @@ int main(int argc, char* argv[])
         printf("%s <IP> <PORT>\n", argv[0]);
         exit(1);
     }
-    my_sock = socket(PF_INET,SOCK_STREAM,0); 
+    my_sock = socket(PF_INET,SOCK_STREAM,0); //1번
     if(my_sock == -1)
         printf("socket error \n");
     memset(&serv_addr,0,sizeof(serv_addr));
@@ -25,12 +25,14 @@ int main(int argc, char* argv[])
     serv_addr.sin_addr.s_addr=inet_addr(argv[1]);
     serv_addr.sin_port=htons(atoi(argv[2]));
 
-    if(connect(my_sock,(struct sockaddr*)&serv_addr,sizeof(serv_addr))==-1)
+    if(connect(my_sock,(struct sockaddr*)&serv_addr,sizeof(serv_addr))==-1) //2번
         printf("connect error\n");
-    write(my_sock, req, sizeof(req)); // 서버로 요청
-    read(my_sock,message,sizeof(message));
-    printf("%s", message); // 한번 요청하고 종료
-    //str_len = read(my_sock,message,sizeof(message));
+    printf("check!");
+    write(my_sock, req, sizeof(req));
+
+    while(read(my_sock,message,sizeof(message)) != 0)
+        printf("%s", message);
+    //str_len = read(my_sock,message,sizeof(message)); //3번
     //if(str_len==-1)
     //    printf("read error\n");
     //printf("%s \n", message);

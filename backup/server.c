@@ -75,9 +75,10 @@ void * handle_clnt(void * arg)
    int clnt_sock=*((int*)arg);
    int str_len=0, i;
    char msg[BUF_SIZE];
-
+   
    while((str_len=read(clnt_sock, msg, sizeof(msg)))!=0)
       send_msg(msg, str_len, arg);
+   
    pthread_mutex_lock(&mutx);
    for(i=0; i<clnt_cnt; i++)   // remove disconnected client
    {
@@ -105,9 +106,9 @@ void send_msg(char * msg, int len, void * arg)   // send to all
    struct stat sb;
    int clnt_sock=*((int*)arg);
    FILE *fp;
+   printf("check!!");
    //pthread_mutex_lock(&mutx);
    strncpy(cp_msg, msg, strlen(msg)+1);
-   //fprintf(stderr, cp_msg);
    //pthread_mutex_unlock(&mutx);
    parse_ptr = strtok_r(cp_msg, " ", &save_ptr);
    if (strcmp(parse_ptr, "GET")!=0) {
@@ -117,20 +118,15 @@ void send_msg(char * msg, int len, void * arg)   // send to all
    parse_ptr = strtok_r(NULL, " ", &save_ptr); // ignore '/'
    parse_ptr = strtok_r(NULL, " ", &save_ptr); // PATH
    //pthread_mutex_lock(&mutx);
-   strncpy(file_name, parse_ptr, strlen(parse_ptr)+1); // /var/tmp/cse20181655/
+   strncpy(file_name, parse_ptr, sizeof(parse_ptr)+1); // /var/tmp/cse20181655/
    //pthread_mutex_unlock(&mutx);
    if (stat(file_name, &sb) < 0)
       write(clnt_sock, "404 Not Found", 14);
       //printf("404 Not Found");
    
    fp = fopen(file_name, "r");
-   //fprintf(stderr, file_name);
-   if(fp == NULL) {
-      fprintf(stderr, "err");
-   }
    pthread_mutex_lock(&mutx);
    while(fgets(file_cont, sizeof(file_cont), fp)) {
-
       write(clnt_sock, file_cont, strlen(file_cont));
    }
    pthread_mutex_unlock(&mutx);
