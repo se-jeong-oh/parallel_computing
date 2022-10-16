@@ -56,6 +56,7 @@ int main(int argc, char *argv[])
    */
   while(1)
    {
+      printf("In while loop...\n");
       clnt_adr_sz=sizeof(clnt_adr);
       clnt_sock=accept(serv_sock, (struct sockaddr*)&clnt_adr,&clnt_adr_sz);
       pthread_mutex_lock(&mutx);
@@ -119,21 +120,30 @@ void send_msg(char * msg, int len, void * arg)   // send to all
    //pthread_mutex_lock(&mutx);
    strncpy(file_name, parse_ptr, strlen(parse_ptr)+1); // /var/tmp/cse20181655/
    //pthread_mutex_unlock(&mutx);
-   if (stat(file_name, &sb) < 0)
-      write(clnt_sock, "404 Not Found", 14);
+   if (stat(file_name, &sb) < 0) {
+      write(clnt_sock, "404 Not Found\n", 15);
+      return;
+   }
       //printf("404 Not Found");
    
    fp = fopen(file_name, "r");
    //fprintf(stderr, file_name);
-   if(fp == NULL) {
-      fprintf(stderr, "err");
-   }
    pthread_mutex_lock(&mutx);
-   while(fgets(file_cont, sizeof(file_cont), fp)) {
-
-      write(clnt_sock, file_cont, strlen(file_cont));
+   while(fgets(file_cont, 100, fp)) {
+      printf("1st : %s", file_cont);
+      if(strcmp(file_cont, "<body>\n") == 0)
+         break;
+   }
+   while(fgets(file_cont, 100, fp)) {
+      printf("2nd : %s", file_cont);
+      if(strcmp(file_cont, "</body>\n") == 0) {
+         write(clnt_sock, file_cont, BUF_SIZE);
+         break;
+      }
+      write(clnt_sock, file_cont, BUF_SIZE);
    }
    pthread_mutex_unlock(&mutx);
+   return;
    //fflush(stdout);
    //pthread_mutex_lock(&mutx);
    //for(i=0; i<clnt_cnt; i++)
