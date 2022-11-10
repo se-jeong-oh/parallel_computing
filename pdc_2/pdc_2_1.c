@@ -1,15 +1,23 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <omp.h>
 
 char dict[25145][25]; // words.txt has 25144 words, which max length is 24
 char rev_dict[25145][25]; // words that reversed
 char org_dict[25145][25]; // words not changed
 #define LEN 25144
 int find_word(char word[]);
-int main()
+int main(int argc, char *argv[])
 {
-    FILE *fp = fopen("words.txt", "r");
+    int threads = atoi(argv[1]);
+    omp_set_num_threads(threads);
+    char input_name[100];
+    strcpy(input_name, argv[2]);
+    char output_name[100];
+    strcpy(output_name, argv[3]);
+    
+    FILE *fp = fopen(input_name, "r");
     char buf[1024];
     char rev_buf[1024];
     int i = 0, j = 0, k = 0, idx, len;
@@ -32,12 +40,16 @@ int main()
         i++;
     }
     fclose(fp);
-    fp = fopen("outputs.txt","w");
+    fp = fopen(output_name,"w");
+    double start = omp_get_wtime();
+
+#pragma omp parallel for
     for (i=0;i<LEN;i++) {
         if(find_word(rev_dict[i]) != -1) {
             fputs(org_dict[i], fp);
         }
     }
+    printf("Elapsed Time: %f\n", omp_get_wtime()-start);
     //idx = strlen(rev_dict[11]);
     //printf("%d\n", strcmp(dict[11], rev_dict[11]));
     //idx = find_word(dict[11]);
@@ -60,8 +72,10 @@ int find_word(char word[])
         else
             start = mid;
         mid = (end + start) / 2;
-        if(mid == end || mid == start)
-            return -1;
+        if(mid == end || mid == start) {
+            mid = -1;
+            break;
+        }
     }
     return mid;
 }
