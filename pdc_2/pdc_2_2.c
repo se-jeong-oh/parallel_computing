@@ -24,6 +24,7 @@ int main(int argc, char *argv[]) {
     else block_len = ARRAY_LEN / n_size_ + 1;
     int array_len = block_len * n_size_;
 
+    // 필요한 배열 초기화
     int *send_num = (int *)calloc(sizeof(int),block_len);
     int *result = (int *)calloc(sizeof(int),array_len);
     int *total = (int *)calloc(sizeof(int),array_len);
