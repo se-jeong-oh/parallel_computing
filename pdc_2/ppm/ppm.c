@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define TRUE 1
 #define FALSE 0
@@ -16,37 +17,137 @@ int fnWritePPM(char* fileNm, PPMImage* img);
 int fnReadPPM(char* fileNm, PPMImage* img);
 void fnClosePPM(PPMImage* img);
 int fnFlipPPM(char* fileNm, PPMImage* img);
+int fnGrayPPM(char* fileNm, PPMImage* img);
+int fnSmoothPPM(char* fileNm, PPMImage* img);
 /*
 TODO
-1) filp image horizontally (mirroring)
-2) gray scale -> taking average of red, green, blue
-3) smooth image -> mean of eight neighbors
+1) filp image horizontally (mirroring) (finish)
+2) gray scale -> taking average of red, green, blue (finish)
+3) smooth image -> mean of eight neighbors (finish)
 */
 int main(int argc, char** argv)
 {
 	PPMImage img;
 	
+    char flipNm[1024] = "./result/flip";
+    char grayNm[1024] = "./result/gray";
+    char smoothNm[1024] = "./result/smooth";
+
 	if(argc != 2){
 		fprintf(stderr, "[Usage] : %s <filename>\n", argv[0]);
 		exit(1);
 	}
 
+    strcat(flipNm, argv[1]);
+    strcat(grayNm, argv[1]);
+    strcat(smoothNm, argv[1]);
 
 	if(fnReadPPM(argv[1], &img) != TRUE){
 		exit(1);
 	}
 
+/*
 	if(fnWritePPM("./result/1.ppm", &img) == TRUE){
 		printf("파일 저장완료!\n");
 	}
+    */
 
-    if(fnFlipPPM("./result/flip1.ppm", &img) == TRUE){
+    if(fnFlipPPM(flipNm, &img) == TRUE){
         printf("flip 파일 저장 완료!\n");
+    }
+
+    if(fnGrayPPM(grayNm, &img) == TRUE){
+        printf("gray 파일 저장 완료!\n");
+    }
+
+    if(fnSmoothPPM(smoothNm, &img) == TRUE){
+        printf("smooth 파일 저장 완료!\n");
     }
 
 	fnClosePPM(&img);
 
 	return 0;
+}
+int fnSmoothPPM(char* fileNm, PPMImage* img)
+{
+    FILE* fp;
+    int r, g, b;
+	fp = fopen(fileNm, "w");
+	if(fp == NULL){
+		fprintf(stderr, "파일 생성에 실패하였습니다.\n");
+		return FALSE;
+	}
+
+	fprintf(fp, "%c%c\n", 'P', '3');
+	fprintf(fp, "%d %d\n" , img->width, img->height);
+	fprintf(fp, "%d\n", 255);
+
+
+	for(int i=0; i<img->height; i++){
+		for(int j=0; j<img->width * 3; j+=3){
+            if(i == 0 || i == img->height -1 || j == 0 || j == img->width*3-3) {
+                fprintf(fp, "%d ", img->pixels[i][j]);
+                fprintf(fp, "%d ", img->pixels[i][j+1]);
+                fprintf(fp, "%d ", img->pixels[i][j+2]);
+                continue;
+            }
+            else {
+                r = (img->pixels[i-1][j] + img->pixels[i+1][j] + img->pixels[i][j-3] + 
+				img->pixels[i-1][j-3] + img->pixels[i+1][j-3] + img->pixels[i][j+3] + 
+				img->pixels[i-1][j+3] + img->pixels[i+1][j+3])/8; 
+
+                g = (img->pixels[i-1][j+1] + img->pixels[i+1][j+1] + img->pixels[i][j-2] + 
+				img->pixels[i-1][j-2] + img->pixels[i+1][j-2] + img->pixels[i][j+4] + 
+				img->pixels[i-1][j+4] + img->pixels[i+1][j+4])/8; 
+
+                b = (img->pixels[i-1][j+2] + img->pixels[i+1][j+2] + img->pixels[i][j-1] + 
+				img->pixels[i-1][j-1] + img->pixels[i+1][j-1] + img->pixels[i][j+5] + 
+				img->pixels[i-1][j+5] + img->pixels[i+1][j+5])/8; 
+				
+                fprintf(fp, "%d ", r);
+                fprintf(fp, "%d ", g);
+                fprintf(fp, "%d ", b);
+            }
+		}
+		fprintf(fp, "\n");	// 생략가능
+	}
+
+	fclose(fp);
+	
+	return TRUE;
+
+}
+int fnGrayPPM(char* fileNm, PPMImage* img)
+{
+    FILE* fp;
+    int mean;
+	fp = fopen(fileNm, "w");
+	if(fp == NULL){
+		fprintf(stderr, "파일 생성에 실패하였습니다.\n");
+		return FALSE;
+	}
+
+	fprintf(fp, "%c%c\n", 'P', '3');
+	fprintf(fp, "%d %d\n" , img->width, img->height);
+	fprintf(fp, "%d\n", 255);
+
+
+	for(int i=0; i<img->height; i++){
+		for(int j=0; j<img->width * 3; j+=3){
+            mean = (img->pixels[i][j] + img->pixels[i][j+1] + img->pixels[i][j+2])/3;
+			fprintf(fp, "%d ", mean);
+			fprintf(fp, "%d ", mean);
+			fprintf(fp, "%d ", mean);
+
+		}
+
+		fprintf(fp, "\n");	// 생략가능
+	}
+
+	fclose(fp);
+	
+	return TRUE;
+
 }
 int fnFlipPPM(char* fileNm, PPMImage* img)
 {
@@ -64,9 +165,9 @@ int fnFlipPPM(char* fileNm, PPMImage* img)
 
     for(int i=0; i<img->height; i++) {
         for(int j=img->width*3-3; j>=0; j-=3) {
-            fprintf(fp, "%d ", img->pixels[i][j+2]);
+            fprintf(fp, "%d ", img->pixels[i][j]);
 			fprintf(fp, "%d ", img->pixels[i][j+1]);
-			fprintf(fp, "%d ", img->pixels[i][j]);
+			fprintf(fp, "%d ", img->pixels[i][j+2]);
         }
         fprintf(fp, "\n");
     }
