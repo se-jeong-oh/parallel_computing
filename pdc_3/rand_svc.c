@@ -20,7 +20,7 @@ static void
 rand_prog_1(struct svc_req *rqstp, register SVCXPRT *transp)
 {
 	union {
-		long initialize_random_1_arg;
+		char *initialize_random_1_arg;
 	} argument;
 	char *result;
 	xdrproc_t _xdr_argument, _xdr_result;
@@ -32,7 +32,7 @@ rand_prog_1(struct svc_req *rqstp, register SVCXPRT *transp)
 		return;
 
 	case INITIALIZE_RANDOM:
-		_xdr_argument = (xdrproc_t) xdr_long;
+		_xdr_argument = (xdrproc_t) xdr_wrapstring;
 		_xdr_result = (xdrproc_t) xdr_int;
 		local = (char *(*)(char *, struct svc_req *)) initialize_random_1_svc;
 		break;

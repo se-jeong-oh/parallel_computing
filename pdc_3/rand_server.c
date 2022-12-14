@@ -17,11 +17,12 @@ int calFunc(int num1, int num2, char op);
 int pow(int num1, int num2);
 
 int *
-initialize_random_1_svc(long *argp, struct svc_req *rqstp) {
+initialize_random_1_svc(char **argp, struct svc_req *rqstp) {
     static int result;
     char string[50];
-    printf("init_serv : %s\n", (char *)argp);
-    strcpy(string, (char *)argp);
+	int length = strlen(*argp);
+	strcpy(string, *argp);
+    printf("init_serv : %s\n", string);
 	int flag = 0;
 	for(int i = 0; i < strlen(string); i++) {
 		if (string[i] == '+' || string[i] == '*' || string[i] == '-' || string[i] == '/') {
@@ -73,14 +74,14 @@ get_next_random_1_svc(void *argp, struct svc_req *rqstp){
 }
 
 int pow(int num1, int num2) {
-    int result = num1;
+    int result = 1;
     for (int i = 0; i<num2;i++)
         result *= num1;
     return result;
 }
 int calFunc(int num1, int num2, char op) {
 	int result;
-	//printf("%d %c %d\n", num1, op, num2);
+	//printf("%d %c %d :", num1, op, num2);
 	switch(op) {
 		case '+': result = num1 + num2; break;
 		case '*': result = num1 * num2; break;
@@ -88,6 +89,7 @@ int calFunc(int num1, int num2, char op) {
 		case '^': result = pow(num2, num1); break;
 		case '-': result = num2 - num1; break;
 	}
+	//printf("%d\n", result);
 	return result;
 }
 int optCheck(char opt1, char opt2) {

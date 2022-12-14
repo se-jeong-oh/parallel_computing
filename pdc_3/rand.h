@@ -19,8 +19,8 @@ extern "C" {
 
 #if defined(__STDC__) || defined(__cplusplus)
 #define INITIALIZE_RANDOM 1
-extern  int * initialize_random_1(long *, CLIENT *);
-extern  int * initialize_random_1_svc(long *, struct svc_req *);
+extern  int * initialize_random_1(char **, CLIENT *);
+extern  int * initialize_random_1_svc(char **, struct svc_req *);
 #define GET_NEXT_RANDOM 2
 extern  double * get_next_random_1(void *, CLIENT *);
 extern  double * get_next_random_1_svc(void *, struct svc_req *);

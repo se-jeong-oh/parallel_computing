@@ -10,13 +10,13 @@
 static struct timeval TIMEOUT = { 25, 0 };
 
 int *
-initialize_random_1(long *argp, CLIENT *clnt)
+initialize_random_1(char **argp, CLIENT *clnt)
 {
 	static int clnt_res;
 
 	memset((char *)&clnt_res, 0, sizeof(clnt_res));
 	if (clnt_call (clnt, INITIALIZE_RANDOM,
-		(xdrproc_t) xdr_long, (caddr_t) argp,
+		(xdrproc_t) xdr_wrapstring, (caddr_t) argp,
 		(xdrproc_t) xdr_int, (caddr_t) &clnt_res,
 		TIMEOUT) != RPC_SUCCESS) {
 		return (NULL);

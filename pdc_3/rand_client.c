@@ -12,23 +12,21 @@ void main(int argc, char *argv[]) {
     double *result_2;
     int *result;
     char *arg;
-    char string[50];
+    char *strings = (char *)malloc(sizeof(char)*50);
     if ( argc != 3 ) {
         fprintf(stderr, "Usage: %s host txt\n", argv[0]);
         exit(1);
     }
+    //while(1) continue;
     clnt = clnt_create(argv[1], RAND_PROG, RAND_VERS, "udp");
     if ( clnt == (CLIENT *) NULL ) {
+        printf("err");
         clnt_pcreateerror(argv[1]);
         exit(1);
     }
-    strcpy(string, argv[2]);
-    int len = strlen(string);
-    //printf("%s\n", buf);
-    //myseed = (long) atoi (argv[2]);
-    //iters = atoi (argv[3]);
-    
-    result = initialize_random_1((long *)string, clnt);
+    strcpy(strings, argv[2]);
+
+    result = initialize_random_1(&strings,clnt);
     /*
     if (result_1 == (void *) NULL) {
         clnt_perror(clnt, "call failed");
